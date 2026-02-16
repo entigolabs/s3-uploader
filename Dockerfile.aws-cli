@@ -1,0 +1,20 @@
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS build
+WORKDIR /go/s3-uploader
+COPY go.* ./
+RUN go mod download
+COPY . .
+ARG TARGETARCH
+ARG TARGETOS
+
+RUN --mount=target=. \
+    --mount=type=cache,target=/root/.cache/go-build \
+    --mount=type=cache,target=/go/pkg \
+    GOOS="$TARGETOS" GOARCH="$TARGETARCH" go build -ldflags "-s -w" -o /out/s3-uploader .
+
+FROM entigolabs/entigo-infralib-aws:dev AS aws
+
+FROM alpine:3.22
+RUN apk add --no-cache python3
+COPY --from=aws /opt/venv /opt/venv
+COPY --from=build /out/s3-uploader /usr/bin/
+ENV PATH="/opt/venv/bin:$PATH"
