@@ -25,16 +25,12 @@ Tags are sorted as semver and oldest versions are deleted based on `--num-latest
 | `--cache-control`        | `max-age=31536000,public` | Cache-Control header for files      |
 | `--index-cache-control`  | `no-cache`                | Cache-Control header for index.html |
 
-## Environment Variables
+## Quick Start (Docker)
 
 ```
 export AWS_ACCESS_KEY_ID=<my-aws-access-key-id>
 export AWS_SECRET_ACCESS_KEY=<my-aws-secret-access-key>
-```
 
-## Example
-
-```
 docker run \
   -e AWS_ACCESS_KEY_ID \
   -e AWS_SECRET_ACCESS_KEY \
