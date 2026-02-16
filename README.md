@@ -59,6 +59,6 @@ docker run \
     name: Deploy
     image: ghcr.io/entigolabs/s3-uploader-aws-cli:latest
     script:
-      - s3-uploader --bucket mybucket --region eu-north-1 --source-directory source- --num-latest-tags-to-keep 3 --tag version=1.0.0
+      - s3-uploader --bucket mybucket --region eu-north-1 --source-directory source --num-latest-tags-to-keep 3 --tag version=1.0.0
       - aws cloudfront create-invalidation --distribution-id XXXXX --paths '/*'
 ```
