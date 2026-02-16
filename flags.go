@@ -31,13 +31,13 @@ func (c *Flags) getValues() error {
 	flag.StringVar(&c.IndexHTMLCacheControl, "index-cache-control", "no-cache", "Cache-Control header for index.html")
 	flag.Parse()
 
-	if c.NumLatestTagsToKeep == 0 || c.SourceDirectory == "" || c.TargetDirectory == "" || c.Bucket == "" || c.Region == "" || c.Tag == "" {
+	if c.NumLatestTagsToKeep == 0 || c.SourceDirectory == "" || c.Bucket == "" || c.Region == "" || c.Tag == "" {
 		return fmt.Errorf("all flags must be set")
 	}
 
 	fmt.Println("Number of latest tags to keep:", c.NumLatestTagsToKeep)
 	fmt.Println("Source directory:", c.SourceDirectory)
-	fmt.Println("Target directory:", c.TargetDirectory)
+	fmt.Println("Target directory:", c.TargetDirectory, "(bucket root if empty)")
 	fmt.Println("AWS bucket name:", c.Bucket)
 	fmt.Println("AWS region:", c.Region)
 	fmt.Println("Tag:", c.Tag)

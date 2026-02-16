@@ -12,7 +12,6 @@ Tags are sorted as semver and oldest versions are deleted based on `--num-latest
 | `--bucket`                  | S3 bucket name                               |
 | `--region`                  | AWS region                                   |
 | `--source-directory`        | Local source directory                       |
-| `--target-directory`        | S3 target directory                          |
 | `--num-latest-tags-to-keep` | Number of latest tags to keep                |
 | `--tag`                     | Tag for uploaded files (format: `key=value`) |
 
@@ -20,10 +19,18 @@ Tags are sorted as semver and oldest versions are deleted based on `--num-latest
 
 | Flag                     | Default                   | Description                         |
 | ------------------------ | ------------------------- | ----------------------------------- |
+| `--target-directory`     | `""` (bucket root)        | S3 target directory                 |
 | `--concurrent-uploads`   | `500`                     | Number of concurrent uploads        |
 | `--concurrent-deletions` | `500`                     | Number of concurrent deletions      |
 | `--cache-control`        | `max-age=31536000,public` | Cache-Control header for files      |
 | `--index-cache-control`  | `no-cache`                | Cache-Control header for index.html |
+
+## Docker Images
+
+| Image                                    | Description                      |
+| ---------------------------------------- | -------------------------------- |
+| `ghcr.io/entigolabs/s3-uploader`         | Base image with s3-uploader only |
+| `ghcr.io/entigolabs/s3-uploader-aws-cli` | Includes AWS CLI                 |
 
 ## Quick Start (Docker)
 
@@ -42,4 +49,16 @@ docker run \
   --target-directory target/ \
   --num-latest-tags-to-keep 3 \
   --tag version=1.0.0
+```
+
+## CI/CD Usage (with AWS CLI)
+
+```yaml
+# Bitbucket Pipelines example
+- step:
+    name: Deploy
+    image: ghcr.io/entigolabs/s3-uploader-aws-cli:latest
+    script:
+      - s3-uploader --bucket mybucket --region eu-north-1 --source-directory source- --num-latest-tags-to-keep 3 --tag version=1.0.0
+      - aws cloudfront create-invalidation --distribution-id XXXXX --paths '/*'
 ```
