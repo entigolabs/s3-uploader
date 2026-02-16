@@ -15,7 +15,7 @@ func main() {
 		return
 	}
 
-	err = validateAWSCredentials(ctx)
+	err = validateAWSCredentials(ctx, flags.Region)
 	if err != nil {
 		fmt.Println("Error validating AWS credentials:", err)
 		return

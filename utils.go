@@ -13,8 +13,8 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 )
 
-func validateAWSCredentials(ctx context.Context) error {
-	cfg, err := config.LoadDefaultConfig(ctx)
+func validateAWSCredentials(ctx context.Context, region string) error {
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
 	if err != nil {
 		return err
 	}
