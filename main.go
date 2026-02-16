@@ -8,7 +8,7 @@ const (
 	concurrentUploads     = 500
 	concurrentDeletions   = 500
 	defaultCacheControl   = "max-age=31536000,public"
-	indexHTMLCacheControl = "nocache"
+	indexHTMLCacheControl = "no-cache"
 )
 
 func main() {
