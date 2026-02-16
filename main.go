@@ -1,17 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 )
 
-const (
-	concurrentUploads     = 500
-	concurrentDeletions   = 500
-	defaultCacheControl   = "max-age=31536000,public"
-	indexHTMLCacheControl = "no-cache"
-)
-
 func main() {
+	ctx := context.Background()
 	flags := Flags{}
 
 	err := flags.getValues()
@@ -20,19 +15,19 @@ func main() {
 		return
 	}
 
-	err = validateAWSCredentials()
+	err = validateAWSCredentials(ctx)
 	if err != nil {
 		fmt.Println("Error validating AWS credentials:", err)
 		return
 	}
 
-	err = uploadFilesToS3(flags)
+	err = uploadFilesToS3(ctx, flags)
 	if err != nil {
 		fmt.Println("Error uploading files to S3:", err)
 		return
 	}
 
-	uniqueTags, err := getUniqueS3ObjectTags(flags)
+	uniqueTags, err := getUniqueS3ObjectTags(ctx, flags)
 	if err != nil {
 		fmt.Println("Error getting S3 object tags:", err)
 		return
@@ -42,7 +37,7 @@ func main() {
 
 	tagsToDelete := getTagsToDelete(flags, sortedUniqueTags)
 
-	err = deleteObjectsWithTags(flags, tagsToDelete)
+	err = deleteObjectsWithTags(ctx, flags, tagsToDelete)
 	if err != nil {
 		fmt.Println("Error deleting objects with tags:", err)
 		return

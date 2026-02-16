@@ -1,27 +1,27 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/gabriel-vasile/mimetype"
 )
 
-func validateAWSCredentials() error {
-	sess, err := session.NewSession(&aws.Config{})
+func validateAWSCredentials(ctx context.Context) error {
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return err
 	}
 
-	svc := sts.New(sess)
+	svc := sts.NewFromConfig(cfg)
 
-	result, err := svc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	result, err := svc.GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
 	if err != nil {
 		return err
 	}

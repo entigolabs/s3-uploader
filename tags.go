@@ -1,27 +1,28 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"sync"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 )
 
-func getUniqueS3ObjectTags(flags Flags) ([]string, error) {
-	sess := session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(flags.Region),
-	}))
-	svc := s3.New(sess)
-
-	// List objects in the assets folder
-	input := &s3.ListObjectsInput{
-		Bucket: aws.String(flags.Bucket),
+func getUniqueS3ObjectTags(ctx context.Context, flags Flags) ([]string, error) {
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(flags.Region))
+	if err != nil {
+		return nil, err
 	}
+	svc := s3.NewFromConfig(cfg)
 
-	result, err := svc.ListObjects(input)
+	// List objects in the bucket
+	result, err := svc.ListObjectsV2(ctx, &s3.ListObjectsV2Input{
+		Bucket: aws.String(flags.Bucket),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -33,17 +34,15 @@ func getUniqueS3ObjectTags(flags Flags) ([]string, error) {
 	uniqueTags := []string{}
 	mutex := sync.Mutex{}
 
-	// Get tags for each object in assets folder
+	// Get tags for each object
 	for _, obj := range result.Contents {
-		go func(obj *s3.Object) {
+		go func(obj types.Object) {
 			defer wg.Done()
 
-			input := &s3.GetObjectTaggingInput{
+			tagResult, err := svc.GetObjectTagging(ctx, &s3.GetObjectTaggingInput{
 				Bucket: aws.String(flags.Bucket),
 				Key:    obj.Key,
-			}
-
-			tagResult, err := svc.GetObjectTagging(input)
+			})
 			if err != nil {
 				fmt.Printf("Error retrieving tags for object %s: %v\n", *obj.Key, err)
 				return
