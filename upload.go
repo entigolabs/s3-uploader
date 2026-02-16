@@ -56,8 +56,7 @@ func uploadFilesToS3(ctx context.Context, flags Flags) error {
 				}
 
 				cacheControl := flags.DefaultCacheControl
-				fileIsIndexHTML, _ := filepath.Match("/index.html", s3Path)
-				if fileIsIndexHTML {
+				if filepath.Base(s3Path) == "index.html" {
 					cacheControl = flags.IndexHTMLCacheControl
 				}
 
