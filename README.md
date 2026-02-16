@@ -1,30 +1,49 @@
 # s3-uploader
 
-s3-uploader is a CLI application written in Go that will upload files to an S3 bucket and add appropriate tags and metadata to the uploaded files. These tags will be used to identify the files that should remain in the bucket and the files that should be deleted.
+CLI tool for uploading files to S3 with version tagging and automatic cleanup of old versions.
+Tags are sorted as semver and oldest versions are deleted based on `--num-latest-tags-to-keep`.
 
-It will set following metadata for the uploaded files: `max-age=2592000,public` <br>
-It will set following metadata for the index.html file: `nocache`
+## Flags
 
-## Example usage
+### Required
 
-Set the environment variables:
+| Flag                        | Description                                  |
+| --------------------------- | -------------------------------------------- |
+| `--bucket`                  | S3 bucket name                               |
+| `--region`                  | AWS region                                   |
+| `--source-directory`        | Local source directory                       |
+| `--target-directory`        | S3 target directory                          |
+| `--num-latest-tags-to-keep` | Number of latest tags to keep                |
+| `--tag`                     | Tag for uploaded files (format: `key=value`) |
+
+### Optional
+
+| Flag                     | Default                   | Description                         |
+| ------------------------ | ------------------------- | ----------------------------------- |
+| `--concurrent-uploads`   | `500`                     | Number of concurrent uploads        |
+| `--concurrent-deletions` | `500`                     | Number of concurrent deletions      |
+| `--cache-control`        | `max-age=31536000,public` | Cache-Control header for files      |
+| `--index-cache-control`  | `no-cache`                | Cache-Control header for index.html |
+
+## Environment Variables
 
 ```
 export AWS_ACCESS_KEY_ID=<my-aws-access-key-id>
 export AWS_SECRET_ACCESS_KEY=<my-aws-secret-access-key>
 ```
 
-Build application with `go build`
-
-Available flags:
-
-- `--bucket`: S3 bucket name
-- `--region`: AWS region
-- `--source-directory`: Source directory
-- `--target-directory`: Target directory
-- `--num-latest-tags-to-keep`: Number of latest tags to keep. This is used to identify the files that should remain in the bucket and the files that should be deleted.
-- `--tag`: Tag to add to the uploaded files
+## Example
 
 ```
-./s3-uploader --bucket mybucket --region eu-west-1 --source-directory source/ --target-directory target/ --num-latest-tags-to-keep 3 --tag version=1.0.0
+docker run \
+  -e AWS_ACCESS_KEY_ID \
+  -e AWS_SECRET_ACCESS_KEY \
+  -v $(pwd)/source:/source \
+  ghcr.io/entigolabs/s3-uploader:latest \
+  --bucket mybucket \
+  --region eu-west-1 \
+  --source-directory /source \
+  --target-directory target/ \
+  --num-latest-tags-to-keep 3 \
+  --tag version=1.0.0
 ```
